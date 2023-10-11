@@ -1,0 +1,41 @@
+version: "3.8"
+
+volumes:
+  local_timescale_data: {}
+  local_grafana_data: {}
+
+networks:
+  arb_trops_db:
+    name: arb_trops_db
+
+services:
+  db:
+    hostname: db
+    container_name: arb_trops_db
+    image: timescale/timescaledb:latest-pg14
+    env_file:
+      - ./.env.dev
+    environment:
+      - TS_TUNE_MAX_CONNS=100
+    volumes:
+      - local_timescale_data:/var/lib/postgresql/data
+      - ./arb_trops.sql:/docker-entrypoint-initdb.d/arb_trops.sql
+    ports:
+      - 5432:5432
+    networks:
+      - arb_trops_db
+
+  grafana:
+    container_name: arb_trops_grafana
+    image: grafana/grafana:main
+    #plugins: grafana-clock-panel,grafana-simple-json-datasource 1.3.5
+    volumes:
+      - local_grafana_data:/var/lib/grafana
+    ports:
+      - 3000:3000
+    # network mode host to access redis using localhost
+    network_mode: host
+    # http://localhost:3000
+    # login/mdp: admin
+    # redis datasource:
+    #   localhost:6379

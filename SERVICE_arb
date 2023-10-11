@@ -1,0 +1,114 @@
+#/bin/bash
+
+if [[ -z "${HOME_ARB}" ]]; then
+    HOME_ARB="$HOME/Trading/arb-trops-phoenix"
+fi
+
+echo $HOME_ARB
+
+HOME_ARB_CONFIG=$HOME_ARB/config/arb_trops_docker
+export PACKAGE_PATH=$HOME_ARB/packages
+
+#source define/env.??
+
+d_start () {
+    start_docker
+    start_redis
+}
+
+start_docker () {
+    echo "starting docker"
+    cd  $HOME_ARB_CONFIG
+    docker-compose up --build -d&
+}
+
+start_redis () {
+    echo "start redis server"
+    redis-server&
+}
+
+d_stop () {
+    stop_redis
+    stop_docker
+}
+
+stop_redis () {
+    echo "flush redis server"
+    redis-cli flushall
+    echo "kill redis server"
+    pkill redis-server
+}
+
+stop_docker () {
+    echo "stopping docker"
+    cd  $HOME_ARB_CONFIG
+    docker-compose stop
+}
+
+hard_stop () {
+    echo "stopping docker and erase image"
+    echo "are you sure?"
+    sleep 5
+
+    cd  $HOME_ARB_CONFIG
+    docker-compose down -v --remove-orphans
+}
+
+d_status () {
+    echo "
+██████╗ ███████╗██████╗ ██╗███████╗
+██╔══██╗██╔════╝██╔══██╗██║██╔════╝
+██████╔╝█████╗  ██║  ██║██║███████╗
+██╔══██╗██╔══╝  ██║  ██║██║╚════██║
+██║  ██║███████╗██████╔╝██║███████║
+╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝╚══════╝
+                                   "
+    ps -eaf | grep redis | grep -v grep
+
+    echo "
+
+██████╗  ██████╗  ██████╗██╗  ██╗███████╗██████╗
+██╔══██╗██╔═══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗
+██║  ██║██║   ██║██║     █████╔╝ █████╗  ██████╔╝
+██║  ██║██║   ██║██║     ██╔═██╗ ██╔══╝  ██╔══██╗
+██████╔╝╚██████╔╝╚██████╗██║  ██╗███████╗██║  ██║
+╚═════╝  ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+                                                 "
+    cd  $HOME_ARB_CONFIG
+    docker-compose ps
+}
+
+d_load () {
+    echo "load all instruments configuration"
+    cd $PACKAGE_PATH
+    python3.10 load_codes/loader.py
+}
+
+case "$1" in
+
+       start|stop)
+               d_${1}
+               ;;
+       restart|reload|force-reload)
+               d_stop
+               d_start
+               ;;
+       force-stop)
+               d_stop
+               hard_stop
+               ;;
+       status)
+              d_status
+              ;;
+       load)
+              d_load
+              ;;
+       *)
+           echo "Usage:"
+           echo "   start|stop|force-stop|status"
+               ;;
+esac
+
+cd -
+
+exit 0

@@ -1,0 +1,4 @@
+# Secrets for exchanges
+bybit:
+  key_id: dummy
+  key_secret: dummy_secret

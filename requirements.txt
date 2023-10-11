@@ -1,0 +1,23 @@
+psycopg2
+ccxt # ~=1.71.51
+coloredlogs # ~=15.0.1
+dacite # ~=1.6.0
+peewee # ~=3.14.10
+python-dotenv # ~=0.20.0
+PyYAML # ~=6.0
+redis # ~=4.2.1
+simplejson # ~=3.17.6
+unsync # ~=1.4.0
+psutil
+tabulate
+playsound
+# PyObjC # needed for playsound
+ta # library for TA indicators
+mango-explorer
+seaborn
+scipy
+statsmodels
+quantstats
+pyarrow
+pandas
+pyyaml
